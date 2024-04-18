@@ -15,7 +15,6 @@ from playwright.sync_api import sync_playwright
 from playwright.sync_api import sync_playwright, Playwright
 import asyncio
 from playwright.async_api import async_playwright
-import pytesseract
 from PIL import Image
 import cv2
 from dotenv import load_dotenv
@@ -270,63 +269,63 @@ if option == 'SHRI KRISHNA DELHI':
 
 
 
-if option == 'other':
+# if option == 'other':
 
-    st.header("Upload IMG 💬")
-    # upload a PDF file
-    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+#     st.header("Upload IMG 💬")
+#     # upload a PDF file
+#     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
-    def extract_text_from_image(image):
-        # Open the image file
-        img = Image.open(image)
-        # Use pytesseract to extract text
-        text = pytesseract.image_to_string(img)
-        return text
+#     def extract_text_from_image(image):
+#         # Open the image file
+#         img = Image.open(image)
+#         # Use pytesseract to extract text
+#         text = pytesseract.image_to_string(img)
+#         return text
 
-    if uploaded_file is not None:
+#     if uploaded_file is not None:
 
-        st.write("The IMG Contains the following data")
-        text = extract_text_from_image(uploaded_file)
-        st.write("Extracted Text:")
-        # st.write(text)
+#         st.write("The IMG Contains the following data")
+#         text = extract_text_from_image(uploaded_file)
+#         st.write("Extracted Text:")
+#         # st.write(text)
 
 
-        # text = ""
-        # for page in text:
-        #     text += page.extract_text()
+#         # text = ""
+#         # for page in text:
+#         #     text += page.extract_text()
 
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
-            length_function=len
-        )
-        chunks = text_splitter.split_text(text=text)
-        # st.write(chunks)
-        # st.write(type(text))
-        text_string = ' '.join(text)
-        # st.write(text)
+#         text_splitter = RecursiveCharacterTextSplitter(
+#             chunk_size=1000,
+#             chunk_overlap=200,
+#             length_function=len
+#         )
+#         chunks = text_splitter.split_text(text=text)
+#         # st.write(chunks)
+#         # st.write(type(text))
+#         text_string = ' '.join(text)
+#         # st.write(text)
 
-        embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-        vectorstore = FAISS.from_texts(chunks, embeddings)
+#         embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+#         vectorstore = FAISS.from_texts(chunks, embeddings)
 
-        chain = load_qa_chain(openai_instance, chain_type="stuff")
+#         chain = load_qa_chain(openai_instance, chain_type="stuff")
 
 
 
         # General Chat Bot Querry
 
-        query_general = st.text_input("Please enter your prompt here.. ", "")
-        docs_party = vectorstore.similarity_search(query_general)
-        output = chain.run(input_documents=docs_party, question=query_general)
-        st.write(output)
+        # query_general = st.text_input("Please enter your prompt here.. ", "")
+        # docs_party = vectorstore.similarity_search(query_general)
+        # output = chain.run(input_documents=docs_party, question=query_general)
+        # st.write(output)
 
         
         
-        # Product Description
-        query_party_name = "From the text - LIST in the following order - slno - description - HSN - quantity - rate -per - amount. (Just list the data do not repeat what i said) Give it to me as a LIST"
-        docs_party = vectorstore.similarity_search(query_party_name)
-        party_name = chain.run(input_documents=docs_party, question=query_party_name)
-        st.write(f"Product Description ",{party_name})
+        # # Product Description
+        # query_party_name = "From the text - LIST in the following order - slno - description - HSN - quantity - rate -per - amount. (Just list the data do not repeat what i said) Give it to me as a LIST"
+        # docs_party = vectorstore.similarity_search(query_party_name)
+        # party_name = chain.run(input_documents=docs_party, question=query_party_name)
+        # st.write(f"Product Description ",{party_name})
 
 
 
