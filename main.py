@@ -16,7 +16,7 @@ from playwright.sync_api import sync_playwright, Playwright
 import asyncio
 from playwright.async_api import async_playwright
 from PIL import Image
-from dotenv import load_dotenv
+import load_dotenv
 import os
 import time
 
