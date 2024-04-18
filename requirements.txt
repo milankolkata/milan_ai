@@ -1,7 +1,6 @@
-openai
+openai==0.10.2
 langchain==0.1.16
 playwright==1.41.2
 PyPDF2==3.0.1
 streamlit==1.32.0
 streamlit_extras==0.4.2
-openai
