@@ -15,7 +15,9 @@ from playwright.sync_api import sync_playwright
 from playwright.sync_api import sync_playwright, Playwright
 import asyncio
 from playwright.async_api import async_playwright
+import pytesseract
 from PIL import Image
+import cv2
 from dotenv import load_dotenv
 import os
 import time
@@ -55,8 +57,12 @@ option = select_box()
 
 
 async def ske_go():
+    
+
+
+
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False, slow_mo=500)
+        browser = await p.chromium.launch(headless=False, slow_mo=100)
         page = await browser.new_page()
         await page.goto("https://milansoft.co.in/")
         await page.click('input[placeholder="Username"]')
@@ -66,7 +72,32 @@ async def ske_go():
         await page.get_by_role("button", name="Submit").click()
         await page.wait_for_load_state("load")
         await asyncio.sleep(2)
-        await page.get_by_role("link", name=" PURCHASE ").dblclick()
+
+        await page.get_by_role("link", name=" MASTER ").click()
+
+
+        for skecode in ske_code_digits:
+            await page.get_by_role("link", name="DESIGN REGISTER", exact=True).click()
+            await page.keyboard.type('SKE',delay=200)
+            await page.keyboard.press('ArrowDown')
+            await page.locator("#brand").select_option("483")
+            await asyncio.sleep(2)
+            await page.locator("#design").click()
+            await page.locator("#design").fill(skecode)
+            await page.locator("#colorid").select_option("45")
+            await page.locator("#salesregister").get_by_role("button", name=" SAVE").click()
+            if await page.query_selector("[role='heading'][name='ERROR MESSAGE !']"):
+                await page.click("#msgok")
+                page.locator("#msgok").click()
+                page.locator("#model-design-dt").get_by_text("×").click()
+#     if page.get_by_text('ERROR MESSAGE !'):
+#         page.locator("#msgok").click()
+#         page.locator("#model-design-dt").get_by_text("×").click()
+
+
+
+
+        await asyncio.sleep(2)
         await page.get_by_role("link", name=" PURCHASE ").click()
         await asyncio.sleep(2)
         await page.get_by_role("link", name="PURCHASE INVOICE (MR)").click()
@@ -84,7 +115,7 @@ async def ske_go():
         await page.locator("#note").press("Tab")
         await page.locator("#issueto").press("Tab")
         # await page.locator("#itemcode3").type("121321")
-        for hsn_code, quantity, description, edition_number, ske_code, price, fabric_detail in zip(hsn_codes, qty_purchased, stripped_product_description, edition, ske_codes, prices, fabric_details): 
+        for hsn_code, quantity, description, edition_number, ske_code, price, fabric_detail in zip(hsn_codes, qty_purchased, stripped_product_description, edition, ske_code_digits, prices, fabric_details): 
             await page.keyboard.type(f'{hsn_code}', delay=200)
             await asyncio.sleep(2)
             await page.keyboard.press('ArrowDown')
@@ -125,6 +156,8 @@ async def ske_go():
             
         await asyncio.sleep(10)
         await browser.close()
+
+
 
 
 if option == 'SHRI KRISHNA DELHI':
@@ -193,7 +226,13 @@ if option == 'SHRI KRISHNA DELHI':
         ske_pattern = r'SKE\d+'
         ske_codes = []
         ske_codes = re.findall(ske_pattern, text)
-        # st.write(ske_codes)
+        st.write(f"Ske code {ske_codes}")
+
+        ske_code_digits_pattern = r"\d{5}"
+        ske_code_digits = [re.search(ske_code_digits_pattern, code).group() for code in ske_codes] 
+        st.write(f"Ske digits {ske_code_digits}")
+
+
 
 
         #HSN Codes
@@ -254,7 +293,7 @@ if option == 'SHRI KRISHNA DELHI':
 
         
         st.write("Extracted Data :")
-        for hsn_code, quantity, description, edition_number, ske_code, price in zip(hsn_codes, qty_purchased, stripped_product_description, edition, ske_codes, prices):
+        for hsn_code, quantity, description, edition_number, ske_code, price in zip(hsn_codes, qty_purchased, stripped_product_description, edition, ske_code_digits, prices):
             st.caption(f"{ske_code} - {description} - {hsn_code} - {price} - {quantity}")
         
 
@@ -268,63 +307,63 @@ if option == 'SHRI KRISHNA DELHI':
 
 
 
-# if option == 'other':
+if option == 'other':
 
-#     st.header("Upload IMG 💬")
-#     # upload a PDF file
-#     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+    st.header("Upload IMG 💬")
+    # upload a PDF file
+    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
-#     def extract_text_from_image(image):
-#         # Open the image file
-#         img = Image.open(image)
-#         # Use pytesseract to extract text
-#         text = pytesseract.image_to_string(img)
-#         return text
+    def extract_text_from_image(image):
+        # Open the image file
+        img = Image.open(image)
+        # Use pytesseract to extract text
+        text = pytesseract.image_to_string(img)
+        return text
 
-#     if uploaded_file is not None:
+    if uploaded_file is not None:
 
-#         st.write("The IMG Contains the following data")
-#         text = extract_text_from_image(uploaded_file)
-#         st.write("Extracted Text:")
-#         # st.write(text)
+        st.write("The IMG Contains the following data")
+        text = extract_text_from_image(uploaded_file)
+        st.write("Extracted Text:")
+        # st.write(text)
 
 
-#         # text = ""
-#         # for page in text:
-#         #     text += page.extract_text()
+        # text = ""
+        # for page in text:
+        #     text += page.extract_text()
 
-#         text_splitter = RecursiveCharacterTextSplitter(
-#             chunk_size=1000,
-#             chunk_overlap=200,
-#             length_function=len
-#         )
-#         chunks = text_splitter.split_text(text=text)
-#         # st.write(chunks)
-#         # st.write(type(text))
-#         text_string = ' '.join(text)
-#         # st.write(text)
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            length_function=len
+        )
+        chunks = text_splitter.split_text(text=text)
+        # st.write(chunks)
+        # st.write(type(text))
+        text_string = ' '.join(text)
+        # st.write(text)
 
-#         embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-#         vectorstore = FAISS.from_texts(chunks, embeddings)
+        embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+        vectorstore = FAISS.from_texts(chunks, embeddings)
 
-#         chain = load_qa_chain(openai_instance, chain_type="stuff")
+        chain = load_qa_chain(openai_instance, chain_type="stuff")
 
 
 
         # General Chat Bot Querry
 
-        # query_general = st.text_input("Please enter your prompt here.. ", "")
-        # docs_party = vectorstore.similarity_search(query_general)
-        # output = chain.run(input_documents=docs_party, question=query_general)
-        # st.write(output)
+        query_general = st.text_input("Please enter your prompt here.. ", "")
+        docs_party = vectorstore.similarity_search(query_general)
+        output = chain.run(input_documents=docs_party, question=query_general)
+        st.write(output)
 
         
         
-        # # Product Description
-        # query_party_name = "From the text - LIST in the following order - slno - description - HSN - quantity - rate -per - amount. (Just list the data do not repeat what i said) Give it to me as a LIST"
-        # docs_party = vectorstore.similarity_search(query_party_name)
-        # party_name = chain.run(input_documents=docs_party, question=query_party_name)
-        # st.write(f"Product Description ",{party_name})
+        # Product Description
+        query_party_name = "From the text - LIST in the following order - slno - description - HSN - quantity - rate -per - amount. (Just list the data do not repeat what i said) Give it to me as a LIST"
+        docs_party = vectorstore.similarity_search(query_party_name)
+        party_name = chain.run(input_documents=docs_party, question=query_party_name)
+        st.write(f"Product Description ",{party_name})
 
 
 
