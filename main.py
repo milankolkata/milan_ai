@@ -62,7 +62,7 @@ async def ske_go():
 
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False, slow_mo=100)
+        browser = await p.chromium.launch(headless=False, slow_mo=200)
         page = await browser.new_page()
         await page.goto("https://milansoft.co.in/")
         await page.click('input[placeholder="Username"]')
@@ -71,12 +71,13 @@ async def ske_go():
         await page.type('input[placeholder="Password"]', "harsh@2001")
         await page.get_by_role("button", name="Submit").click()
         await page.wait_for_load_state("load")
-        await asyncio.sleep(2)
+        await asyncio.sleep(1s)
 
         await page.get_by_role("link", name=" MASTER ").click()
 
 
         for skecode in ske_code_digits:
+
             await page.get_by_role("link", name="DESIGN REGISTER", exact=True).click()
             await page.keyboard.type('SKE',delay=200)
             await page.keyboard.press('ArrowDown')
@@ -86,10 +87,15 @@ async def ske_go():
             await page.locator("#design").fill(skecode)
             await page.locator("#colorid").select_option("45")
             await page.locator("#salesregister").get_by_role("button", name=" SAVE").click()
-            if await page.query_selector("[role='heading'][name='ERROR MESSAGE !']"):
-                await page.click("#msgok")
-                page.locator("#msgok").click()
-                page.locator("#model-design-dt").get_by_text("×").click()
+            await page.get_by_text("× ERROR MESSAGE !").click()
+            await page.locator("#model-err-msg").click()
+            # popup = await page.wait_for_event("popup")
+            # if await popup.query_selector(text="Error! Design already exists !"):
+            #     await popup.locator("#msgok").click()
+            #     print('gotin')
+            #     # await page.locator("#model-design-dt").get_by_text("×").click()
+            await asyncio.sleep(1)
+
 #     if page.get_by_text('ERROR MESSAGE !'):
 #         page.locator("#msgok").click()
 #         page.locator("#model-design-dt").get_by_text("×").click()
